@@ -10,25 +10,21 @@ import { invalidateCache } from "../utils/features";
 // import {faker} from '@faker-js/faker'
 
 
-    export const getlatestProducts = TryCatch(
-        async (req, res, next) =>{
+ export const getlatestProducts = TryCatch(async (req, res, next) => {
+  let products;
 
-            let products;
+  if (myCache.has("latest-products"))
+    products = JSON.parse(myCache.get("latest-products") as string);
+  else {
+    products = await Product.find({}).sort({ createdAt: -1 }).limit(5);
+    myCache.set("latest-products", JSON.stringify(products));
+  }
 
-            if (myCache.has("latest-product"))
-                products = JSON.parse(myCache.get("latest-product") as string);
-             else{
-                products = await Product.find({}).sort({ createdAt: -1}).limit(5);
-
-                myCache.set("latest-product", JSON.stringify(products));
-             }
-            
-            return res.status(200).json({
-                success: true,
-                products,
-            });
-        }
-    )
+  return res.status(200).json({
+    success: true,
+    products,
+  });
+});
 
 
     export const getAllCategories = TryCatch(
